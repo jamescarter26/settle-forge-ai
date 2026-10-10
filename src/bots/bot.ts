@@ -109,7 +109,7 @@ export function botAction(s: GameState, p: number): Action {
 
   const spots = settlementSpots(s, p);
   const target: Partial<ResMap> =
-    pl.citiesLeft > 0 && pl.settlementsLeft < 5 - 0 && Object.values(s.buildings).some((b) => b.owner === p && b.kind === "campement") && spots.length === 0
+    pl.citiesLeft > 0 && Object.values(s.buildings).some((b) => b.owner === p && b.kind === "campement") && spots.length === 0
       ? COSTS.cottage
       : spots.length && pl.settlementsLeft > 0
         ? COSTS.campement
@@ -130,7 +130,7 @@ export function botAction(s: GameState, p: number): Action {
   const roads = of("BUILD_ROAD");
   if (roads.length && spots.length === 0 && (target === COSTS.pirogue || target === COSTS.campement || pl.roadsLeft > 8))
     return best(roads, (a) => edgeScore(s, a.edge))!;
-  if (of("BUY_DEV").length && (target === COSTS.sirandane || canAfford(pl.hand, { ...COSTS.sirandane, ...addCost(target) })))
+  if (of("BUY_DEV").length && (target === COSTS.sirandane || canAfford(pl.hand, addCost(target))))
     return of("BUY_DEV")[0];
 
   if (missing.length) {
@@ -145,6 +145,6 @@ export function botAction(s: GameState, p: number): Action {
 
 function addCost(c: Partial<ResMap>): Partial<ResMap> {
   const out: Partial<ResMap> = {};
-  for (const r of RESOURCES as Resource[]) out[r] = (c[r] ?? 0) + (COSTS.sirandane as Partial<ResMap>)[r]! || (c[r] ?? 0);
+  for (const r of RESOURCES as Resource[]) out[r] = (c[r] ?? 0) + ((COSTS.sirandane as Partial<ResMap>)[r] ?? 0);
   return out;
 }
