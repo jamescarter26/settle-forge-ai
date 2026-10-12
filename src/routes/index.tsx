@@ -1,24 +1,26 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
+import { createGame } from "@/engine/engine";
+import type { GameState } from "@/engine/types";
+import { SetupScreen } from "@/ui/SetupScreen";
+import { GameScreen } from "@/ui/GameScreen";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "MORIS — Les Bâtisseurs de l'Île" },
+      { name: "description", content: "Jeu de colonisation mauricien pour 3 à 4 joueurs, humains ou robots." },
+      { property: "og:title", content: "MORIS — Les Bâtisseurs de l'Île" },
+      { property: "og:description", content: "Bâtissez campements et cottages créoles sur l'île Maurice. 10 PV pour gagner." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
+  const [game, setGame] = useState<GameState | null>(null);
+  if (!game) return <SetupScreen onStart={(c, seed) => setGame(createGame(c, seed))} />;
+  return <GameScreen key={game.seed} initial={game} onQuit={() => setGame(null)} />;
 }
